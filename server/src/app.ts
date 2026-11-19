@@ -2,10 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 import cors from 'cors';
 import express, { type Express } from 'express';
-import type { ParserProviderKind } from '@mw4trackstats/shared';
+import { validateActivisionId, type ParserProviderKind } from '@mw4trackstats/shared';
 import type { AppConfig } from './config.js';
 import type { JobRepository, StatsRepository } from './db/repository.js';
 import type { SessionRepository } from './db/sessionRepository.js';
+import { buildOEmbedPayload, renderIndexHtmlWithEmbedMeta } from './embeds/ogMeta.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { createIpRateLimiter, type IpRateLimiter } from './middleware/rateLimit.js';
 import type { XProvider } from './providers/x/index.js';
@@ -44,6 +45,8 @@ export function createApp(deps: AppDependencies): Express {
     .split(',')
     .map((origin) => origin.trim())
     .filter(Boolean);
+
+  const primaryPublicOrigin = (allowedOrigins[0] ?? 'http://localhost:5173').replace(/\/+$/, '');
 
   app.use(
     cors({
@@ -89,6 +92,19 @@ export function createApp(deps: AppDependencies): Express {
     }),
   );
 
+  app.get('/api/oembed', readLimiter.middleware, (req, res) => {
+    const rawId = typeof req.query.id === 'string' ? req.query.id : null;
+    const validation = rawId ? validateActivisionId(rawId) : null;
+    const stats = validation?.valid ? deps.statsRepo.getLatest(validation.normalized) : null;
+    res.json(
+      buildOEmbedPayload({
+        stats,
+        activisionId: validation?.valid ? validation.canonical : null,
+        publicOrigin: primaryPublicOrigin,
+      }),
+    );
+  });
+
   app.use(
     '/api',
     createStatsRouter({
@@ -104,10 +120,25 @@ export function createApp(deps: AppDependencies): Express {
     const clientDistDir = path.resolve(deps.config.repoRoot, 'client', 'dist');
     const indexHtml = path.join(clientDistDir, 'index.html');
     if (fs.existsSync(indexHtml)) {
-      app.use(express.static(clientDistDir));
+      const indexHtmlTemplate = fs.readFileSync(indexHtml, 'utf8');
+      app.use(express.static(clientDistDir, { index: false }));
       app.use((req, res, next) => {
         if (req.method === 'GET' && !req.path.startsWith('/api')) {
-          res.sendFile(indexHtml);
+          const rawId = typeof req.query.id === 'string' ? req.query.id : null;
+          const validation = rawId ? validateActivisionId(rawId) : null;
+          const queriedId = validation?.valid ? validation.canonical : null;
+          const stats = validation?.valid
+            ? deps.statsRepo.getLatest(validation.normalized)
+            : null;
+          const html = renderIndexHtmlWithEmbedMeta({
+            templateHtml: indexHtmlTemplate,
+            stats,
+            queriedId,
+            publicOrigin: primaryPublicOrigin,
+          });
+          res.setHeader('Content-Type', 'text/html; charset=utf-8');
+          res.setHeader('Cache-Control', 'no-cache');
+          res.send(html);
           return;
         }
         next();
