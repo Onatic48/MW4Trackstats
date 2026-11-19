@@ -14,7 +14,7 @@ import type { SessionRepository } from '../db/sessionRepository.js';
 import type { RateLimitDecision } from '../middleware/rateLimit.js';
 import { ParseFailedError, type ImageParser } from '../providers/parser/index.js';
 import {
-  downloadTrustedXImage,
+  fetchTrustedXImageBuffer,
   saveLocalImage,
   XChallengeRequiredError,
   XProviderError,
@@ -421,20 +421,29 @@ export class JobQueueService {
       if (this.stopped) return;
       this.emitJobUpdate(this.deps.jobRepo.updateStep(job.id, 'downloading_image'));
 
-      let savedImage: { filename: string; buffer: Buffer; mimeType: string };
+      let imageBuffer: Buffer;
+      let imageMimeType: string;
+      let persistedFilename: string | null = null;
+      let resolvedImageUrl: string | null = null;
+
       try {
-        if (media.localImageBuffer) {
-          savedImage = await saveLocalImage(
+        if (media.imageUrl) {
+          const fetched = await fetchTrustedXImageBuffer(
+            media.imageUrl,
+            this.deps.fetchImpl,
+          );
+          imageBuffer = fetched.buffer;
+          imageMimeType = fetched.mimeType;
+          resolvedImageUrl = fetched.finalUrl;
+        } else if (media.localImageBuffer) {
+          const savedImage = await saveLocalImage(
             media.localImageBuffer,
             media.mimeType ?? 'image/png',
             this.deps.config.imagesDir,
           );
-        } else if (media.imageUrl) {
-          savedImage = await downloadTrustedXImage(
-            media.imageUrl,
-            this.deps.config.imagesDir,
-            this.deps.fetchImpl,
-          );
+          imageBuffer = savedImage.buffer;
+          imageMimeType = savedImage.mimeType;
+          persistedFilename = savedImage.filename;
         } else {
           throw new ImageDownloadError('Bot reply did not include an image attachment');
         }
@@ -451,8 +460,8 @@ export class JobQueueService {
       this.emitJobUpdate(this.deps.jobRepo.updateStep(job.id, 'parsing_image'));
 
       const parsed = await this.deps.imageParser.parse({
-        buffer: savedImage.buffer,
-        mimeType: savedImage.mimeType,
+        buffer: imageBuffer,
+        mimeType: imageMimeType,
         activisionId: job.activisionId,
       });
 
@@ -467,8 +476,8 @@ export class JobQueueService {
         season: parsed.season,
         sourceBotHandle: this.deps.config.xBotHandle,
         replyTweetId: media.replyTweetId,
-        imageUrl: media.imageUrl ?? null,
-        localImagePath: `/api/images/${savedImage.filename}`,
+        imageUrl: resolvedImageUrl,
+        localImagePath: persistedFilename ? `/api/images/${persistedFilename}` : null,
         fetchedAt: new Date(fetchedAtMs).toISOString(),
         expiresAt: new Date(expiresAtMs).toISOString(),
         parserProvider: this.deps.imageParser.name,
@@ -480,7 +489,7 @@ export class JobQueueService {
       if (this.stopped) return;
       const previousRecord = this.deps.statsRepo.getLatest(job.normalizedId);
       this.deps.statsRepo.upsert(stats);
-      await this.removeReplacedImage(previousRecord?.localImagePath, savedImage.filename);
+      await this.removeReplacedImage(previousRecord?.localImagePath, persistedFilename ?? '');
       const completed = this.deps.jobRepo.complete(job.id, stats);
       this.emitJobUpdate(completed);
       console.log(

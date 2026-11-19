@@ -1,5 +1,6 @@
 import type {
   AuthStatusResponse,
+  CombatRecordStats,
   HealthResponse,
   JobErrorCode,
   JobStatusResponse,
@@ -99,6 +100,25 @@ export async function fetchRecentLookups(): Promise<RecentPlayerSummary[]> {
   }
   const body = (await res.json()) as { items: RecentPlayerSummary[] };
   return body.items;
+}
+
+export interface CachedPlayerResponse {
+  found: boolean;
+  fresh?: boolean;
+  data: CombatRecordStats | null;
+}
+
+export async function fetchCachedPlayer(activisionId: string): Promise<CachedPlayerResponse> {
+  const res = await fetchWithTransientRetry(
+    `/api/stats/player/${encodeURIComponent(activisionId)}`,
+  );
+  if (res.status === 404) {
+    return { found: false, data: null };
+  }
+  if (!res.ok) {
+    throw await parseErrorResponse(res);
+  }
+  return (await res.json()) as CachedPlayerResponse;
 }
 
 export async function requestPlayerStats(

@@ -20,6 +20,7 @@ import {
 } from '../providers/x/mockXProvider.js';
 import {
   downloadTrustedXImage,
+  fetchTrustedXImageBuffer,
   validateTrustedImageUrl,
 } from '../providers/x/mediaDownload.js';
 
@@ -428,13 +429,31 @@ describe('SSRF protection for media downloads', () => {
       downloadTrustedXImage('https://pbs.twimg.com/media/test.png', tmpDir, redirectFetch),
     ).rejects.toThrow(/untrusted image host/i);
 
+    await expect(
+      fetchTrustedXImageBuffer('https://pbs.twimg.com/media/test.png', redirectFetch),
+    ).rejects.toThrow(/untrusted image host/i);
+
     const pngBytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
-    const validFetch = vi.fn().mockResolvedValue(
-      new Response(pngBytes, {
-        status: 200,
-        headers: { 'content-type': 'image/png' },
-      }),
+    const validFetch = vi.fn().mockImplementation(() =>
+      Promise.resolve(
+        new Response(pngBytes, {
+          status: 200,
+          headers: { 'content-type': 'image/png' },
+        }),
+      ),
     ) as unknown as typeof fetch;
+
+    const emptyTmpBefore = await fs.readdir(tmpDir);
+    expect(emptyTmpBefore).toHaveLength(0);
+
+    const inMemory = await fetchTrustedXImageBuffer(
+      'https://pbs.twimg.com/media/valid.png',
+      validFetch,
+    );
+    expect(inMemory.mimeType).toBe('image/png');
+    expect(inMemory.finalUrl).toBe('https://pbs.twimg.com/media/valid.png');
+    expect(inMemory.buffer.byteLength).toBe(pngBytes.byteLength);
+    expect(await fs.readdir(tmpDir)).toHaveLength(0);
 
     const saved = await downloadTrustedXImage(
       'https://pbs.twimg.com/media/valid.png',

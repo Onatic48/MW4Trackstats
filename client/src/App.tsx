@@ -48,6 +48,7 @@ function TrackerWorkspace() {
     authNotice,
     isSubmitting,
     submitLookup,
+    viewPlayerRecord,
     handleLogout,
     handleRecordPurged,
   } = useStatsLookup();
@@ -73,6 +74,7 @@ function TrackerWorkspace() {
           isSubmitting={isSubmitting}
           serverError={inlineValidationError}
           onSubmit={(id) => void submitLookup(id, false)}
+          onSelectSample={(id) => void viewPlayerRecord(id)}
         />
 
         {authNoticeText ? (
@@ -173,7 +175,7 @@ function TrackerWorkspace() {
 
         <RecentLookups
           items={recent}
-          onSelect={(id) => void submitLookup(id, false)}
+          onSelect={(id) => void viewPlayerRecord(id)}
         />
       </main>
 

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react';
-import { Check, Copy, Maximize2, RefreshCw, X } from 'lucide-react';
+import { Check, Copy, ExternalLink, Maximize2, RefreshCw, X } from 'lucide-react';
 import type { CombatRecordStats, GameModeKey } from '@mw4trackstats/shared';
 import type { StatsSourceKind } from '../hooks/useStatsLookup';
 import { useI18n } from '../i18n/I18nContext';
@@ -540,6 +540,12 @@ export function StatsDashboard({
       ? t.dashboard.seasonLabel
       : stats.season;
 
+  const cardImageSrc = stats.imageUrl ?? stats.localImagePath;
+  const xSourceUrl =
+    stats.replyTweetId && /^\d+$/.test(stats.replyTweetId)
+      ? `https://x.com/${stats.sourceBotHandle}/status/${stats.replyTweetId}`
+      : stats.imageUrl;
+
   const formatOutcome = (
     value: number | null,
     singular: string,
@@ -865,23 +871,37 @@ export function StatsDashboard({
               {t.dashboard.cardViewer.subtitle}
             </p>
 
-            {stats.localImagePath ? (
+            {cardImageSrc ? (
               <div className="mt-4 space-y-3">
                 <div className="rounded-[8px] overflow-hidden border border-[var(--border-hairline)] bg-[var(--bg-deep)]">
                   <img
-                    src={stats.localImagePath}
+                    src={cardImageSrc}
                     alt={`${stats.activisionId} @CODCombatRecord card`}
+                    referrerPolicy="no-referrer"
                     className="w-full h-auto block"
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={() => dialogRef.current?.showModal()}
-                  className="w-full h-9 px-3.5 rounded-[8px] bg-[var(--bg-raised)] border border-[var(--border-hairline)] hover:border-[var(--border-strong)] text-[13px] font-medium text-[var(--text-primary)] inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-[border-color,transform] duration-150 cursor-pointer"
-                >
-                  <Maximize2 size={16} strokeWidth={1.5} className="text-[var(--text-secondary)]" aria-hidden="true" />
-                  <span>{t.dashboard.cardViewer.openButton}</span>
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => dialogRef.current?.showModal()}
+                    className="flex-1 h-9 px-3.5 rounded-[8px] bg-[var(--bg-raised)] border border-[var(--border-hairline)] hover:border-[var(--border-strong)] text-[13px] font-medium text-[var(--text-primary)] inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-[border-color,transform] duration-150 cursor-pointer"
+                  >
+                    <Maximize2 size={16} strokeWidth={1.5} className="text-[var(--text-secondary)]" aria-hidden="true" />
+                    <span>{t.dashboard.cardViewer.openButton}</span>
+                  </button>
+                  {xSourceUrl ? (
+                    <a
+                      href={xSourceUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="h-9 px-3.5 rounded-[8px] bg-[var(--bg-raised)] border border-[var(--border-hairline)] hover:border-[var(--border-strong)] text-[13px] font-medium text-[var(--text-primary)] inline-flex items-center justify-center gap-2 active:scale-[0.98] transition-[border-color,transform] duration-150"
+                    >
+                      <ExternalLink size={15} strokeWidth={1.5} className="text-[var(--text-secondary)]" aria-hidden="true" />
+                      <span>{t.dashboard.cardViewer.openOnXButton}</span>
+                    </a>
+                  ) : null}
+                </div>
               </div>
             ) : (
               <p className="mt-3 text-[13px] text-[var(--text-muted)]">
@@ -914,11 +934,12 @@ export function StatsDashboard({
             </button>
           </form>
         </div>
-        {stats.localImagePath ? (
+        {cardImageSrc ? (
           <div className="p-4 bg-[var(--bg-deep)]">
             <img
-              src={stats.localImagePath}
+              src={cardImageSrc}
               alt={`${stats.activisionId} full combat record card`}
+              referrerPolicy="no-referrer"
               className="max-w-full max-h-[75vh] w-auto h-auto mx-auto rounded-[8px] block"
             />
           </div>

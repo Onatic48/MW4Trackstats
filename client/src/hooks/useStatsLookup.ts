@@ -9,6 +9,7 @@ import type {
 import {
   ApiError,
   fetchAuthStatus,
+  fetchCachedPlayer,
   fetchJobStatus,
   fetchRecentLookups,
   logoutX,
@@ -257,6 +258,47 @@ export function useStatsLookup() {
     [handleTerminalJob, refreshMetadata, startPollingFallback, stopTracking, syncUrlId],
   );
 
+  const viewPlayerRecord = useCallback(
+    async (rawId: string) => {
+      const trimmed = rawId.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      stopTracking();
+      setIsSubmitting(true);
+      setError(null);
+      setPendingLoginId(null);
+      setAuthNotice(null);
+      setActiveJob(null);
+
+      try {
+        const res = await fetchCachedPlayer(trimmed);
+        if (res.found && res.data) {
+          setStats(res.data);
+          setSource(res.fresh ? 'cached' : 'stale');
+          setIsSubmitting(false);
+          syncUrlId(res.data.activisionId);
+          return;
+        }
+      } catch (err) {
+        setIsSubmitting(false);
+        if (err instanceof ApiError) {
+          setError({ code: err.code, message: err.message });
+        } else {
+          setError({
+            code: 'INTERNAL_ERROR',
+            message: err instanceof Error ? err.message : 'Unexpected network error',
+          });
+        }
+        return;
+      }
+
+      await submitLookup(trimmed, false);
+    },
+    [stopTracking, submitLookup, syncUrlId],
+  );
+
   const handleLogout = useCallback(async () => {
     try {
       await logoutX();
@@ -280,6 +322,7 @@ export function useStatsLookup() {
     const url = new URL(window.location.href);
     const idParam = url.searchParams.get('id');
     const authErrorParam = url.searchParams.get('authError');
+    const isAutoLookup = url.searchParams.get('autolookup') === '1';
 
     if (authErrorParam) {
       setAuthNotice(authErrorParam);
@@ -293,9 +336,13 @@ export function useStatsLookup() {
     }
 
     if (idParam && idParam.trim().length > 0) {
-      void submitLookup(idParam, false);
+      if (isAutoLookup) {
+        void submitLookup(idParam, false);
+      } else {
+        void viewPlayerRecord(idParam);
+      }
     }
-  }, [submitLookup]);
+  }, [submitLookup, viewPlayerRecord]);
 
   const handleRecordPurged = useCallback(
     (purgedActivisionId: string) => {
@@ -320,6 +367,7 @@ export function useStatsLookup() {
     authNotice,
     isSubmitting,
     submitLookup,
+    viewPlayerRecord,
     handleLogout,
     handleRecordPurged,
   };

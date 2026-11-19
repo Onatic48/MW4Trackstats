@@ -116,11 +116,12 @@ export const tr: Translations = {
     },
     cardViewer: {
       title: 'Orijinal @CODCombatRecord kartı',
-      subtitle: 'Verilerin okunduğu indirilen bot görseli',
+      subtitle: 'Doğrudan X (@CODCombatRecord) kaynağından gösterilir (sunucumuzda saklanmaz)',
       openButton: 'Tam görseli incele',
+      openOnXButton: "X'te aç",
       closeButton: 'Kapat',
       dialogTitle: 'Orijinal savaş kaydı görseli',
-      unavailable: 'Bu kayıt için görsel saklanmadı',
+      unavailable: 'Bu kayıt için kart görseli bağlantısı mevcut değil',
     },
   },
   recent: {
@@ -161,17 +162,17 @@ export const tr: Translations = {
       'Önbellekte bulunan kayıtları görüntülemek için giriş yapmanız gerekmez. Önbellekte olmayan bir oyuncu sorguladığınızda X OAuth 2.0 ile giriş yaparak, yalnızca bot yanıtını tetiklemek amacıyla X hesabınızdan @CODCombatRecord hesabına (@CODCombatRecord Call of Duty <ActivisionID>) etiketleme gönderisi paylaşılmasına açıkça izin verirsiniz. Üst menüden istediğiniz an Çıkış yapabilirsiniz; çıkış yaptığınızda OAuth oturumunuz ve erişim anahtarlarınız veritabanımızdan anında silinir.',
     privacyHeading: '3. Gizlilik politikası (6698 sayılı KVKK / GDPR) ve veri saklama süresi',
     privacyBody:
-      'Sistemimiz yalnızca sorgulanan Activision ID bilgisini, @CODCombatRecord tarafından paylaşılan herkese açık kart görselini ve (giriş yapan kullanıcılar için) oturum yönetimi amacıyla X kullanıcı kimliği ile OAuth 2.0 belirteçlerini işler. Önbelleğe alınan oyuncu istatistikleri 30 dakika boyunca sunulur ve en geç 7 gün içinde otomatik olarak silinir; X oturumları 30 gün sonunda veya çıkış yapıldığında derhal silinir. Veriler üçüncü taraflarla paylaşılmaz veya satılmaz.',
+      'Sistemimiz yalnızca sorgulanan Activision ID bilgisini, @CODCombatRecord gönderisinden bellek içinde geçici olarak okunup silinen görseldeki istatistikleri ve (giriş yapan kullanıcılar için) oturum yönetimi amacıyla X kullanıcı kimliği ile OAuth 2.0 belirteçlerini işler. Savaş kaydı görselleri sunucumuzda depolanmaz, doğrudan X (pbs.twimg.com) üzerinden görüntülenir. Önbellek verileri 30 dakika boyunca sunulur ve en geç 7 gün içinde otomatik silinir; X oturumları çıkış yapıldığında derhal silinir. Veriler üçüncü taraflarla paylaşılmaz.',
     cookiesHeading: '4. Çerez (Cookie) ve yerel depolama bildirimi',
     cookiesBody:
       'MW4Trackstats reklam, analitik veya üçüncü taraf takip çerezi kullanmaz. Yalnızca X ile giriş yaptığınızda oturum güvenliği için zorunlu HttpOnly çerezler (mw4_x_session, mw4_oauth_state) ve dil tercihinizi hatırlamak için tarayıcı localStorage alanı (mw4trackstats.locale) kullanılır.',
     removalHeading: '5. Unutulma / silinme hakkı — önbellekteki oyuncu kaydını kaldır',
     removalDescription:
-      'KVKK Madde 11, GDPR Madde 17 ve X Geliştirici Politikası kapsamında, herhangi bir Activision ID kaydını ve sunucuda tutulan kart görselini aşağıdan anında kalıcı olarak silebilirsiniz:',
+      'KVKK Madde 11, GDPR Madde 17 ve X Geliştirici Politikası kapsamında, herhangi bir Activision ID kaydını ve önbellekte tutulan istatistik/bağlantı verisini aşağıdan anında kalıcı olarak silebilirsiniz:',
     removalInputPlaceholder: 'Onatic#3733397',
     removalSubmitButton: 'Kaydı sunucudan sil',
     removalSubmittingButton: 'Siliniyor',
-    removalSuccessFound: 'Bu kimliğe ait önbellek verisi ve kart görseli sunucudan kalıcı olarak silindi:',
-    removalSuccessNotFound: 'Sunucuda bu kimliğe ait kayıtlı önbellek verisi veya görsel bulunamadı:',
+    removalSuccessFound: 'Bu kimliğe ait önbellek kaydı sunucudan kalıcı olarak silindi:',
+    removalSuccessNotFound: 'Sunucuda bu kimliğe ait kayıtlı bir önbellek verisi bulunamadı:',
   },
 };

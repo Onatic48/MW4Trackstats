@@ -116,11 +116,12 @@ export const en: Translations = {
     },
     cardViewer: {
       title: 'Original @CODCombatRecord card',
-      subtitle: 'Downloaded reply image used for metric extraction',
+      subtitle: 'Loaded directly from @CODCombatRecord on X (not stored on our server)',
       openButton: 'Inspect full image',
+      openOnXButton: 'Open on X',
       closeButton: 'Close',
       dialogTitle: 'Original combat record image',
-      unavailable: 'Card image not stored for this entry',
+      unavailable: 'Card image is not available for this entry',
     },
   },
   recent: {
@@ -161,17 +162,17 @@ export const en: Translations = {
       'Cached lookups require no login. When you request an uncached lookup and sign in with X OAuth 2.0, you explicitly authorize MW4Trackstats to publish a mention post (@CODCombatRecord Call of Duty <ActivisionID>) from your X account solely to trigger the official bot reply. You can sign out at any time from the top bar, which immediately deletes your OAuth session and tokens from our database.',
     privacyHeading: '3. Privacy policy (GDPR / KVKK) & data retention',
     privacyBody:
-      'We only process the queried Activision ID, the public combat record card returned by @CODCombatRecord, and (for signed-in users) your X user ID, handle, and OAuth 2.0 tokens for session management. Cached player stats are served for 30 minutes and automatically purged after 7 days; X sessions expire after 30 days or immediately upon sign-out. We never sell or share data with third parties.',
+      'We only process the queried Activision ID, structured stats extracted transiently in memory from the public @CODCombatRecord post, and (for signed-in users) your X user ID, handle, and OAuth 2.0 tokens for session management. Combat record card images are served directly from X (pbs.twimg.com) and are never stored on our server disk. Cached stats are served for 30 minutes and automatically purged after 7 days; X sessions expire after 30 days or immediately upon sign-out. We never sell or share data with third parties.',
     cookiesHeading: '4. Cookie & storage notice',
     cookiesBody:
       'MW4Trackstats uses zero advertising, analytics, or third-party tracking cookies. We only use strictly necessary HttpOnly session cookies (mw4_x_session, mw4_oauth_state) when you sign in with X, and browser localStorage (mw4trackstats.locale) to remember your language preference.',
     removalHeading: '5. Right to erasure — remove cached player record',
     removalDescription:
-      'Under GDPR Art. 17, KVKK Art. 11, and X Developer Policy, you can immediately delete any cached Activision ID record and its downloaded card image from this server:',
+      'Under GDPR Art. 17, KVKK Art. 11, and X Developer Policy, you can immediately delete any cached Activision ID record and its stored metrics/X link from this server:',
     removalInputPlaceholder: 'Onatic#3733397',
     removalSubmitButton: 'Delete cached record',
     removalSubmittingButton: 'Deleting',
-    removalSuccessFound: 'Cached stats and card image were permanently deleted from the server for',
-    removalSuccessNotFound: 'No cached record or image was stored on the server for',
+    removalSuccessFound: 'Cached record was permanently deleted from the server for',
+    removalSuccessNotFound: 'No cached record was stored on the server for',
   },
 };

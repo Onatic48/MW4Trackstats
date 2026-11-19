@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -291,6 +292,71 @@ describe('X OAuth 2.0 PKCE User Flow & Daily Limit Isolation', () => {
     expect(publicCachedRes.body.status).toBe('cached');
   });
 
+  it('serves stale cached profile via GET /api/stats/player/:id without X login while requiring X login for live POST /api/stats', async () => {
+    statsRepo.upsert({
+      activisionId: 'Onatic#3733397',
+      normalizedId: 'onatic#3733397',
+      parsedActivisionId: 'Onatic#3733397',
+      season: 'Season 01',
+      sourceBotHandle: 'CODCombatRecord',
+      replyTweetId: '2123465813113851941',
+      imageUrl: 'https://pbs.twimg.com/media/HXgQ53eXAAAnXWK.jpg',
+      localImagePath: null,
+      fetchedAt: '2020-01-01T00:00:00.000Z',
+      expiresAt: '2020-01-01T00:30:00.000Z',
+      parserProvider: 'gemini',
+      xProvider: 'api',
+      cardLayout: 'multi_mode',
+      modes: {
+        multiplayer: {
+          timePlayed: '14H 35M',
+          timePlayedMinutes: 875,
+          kills: 2401,
+          kdRatio: 0.98,
+          highestStreak: 12,
+          wins: 67,
+        },
+        dmz: {
+          timePlayed: '2D 4H',
+          timePlayedMinutes: 3120,
+          playerEliminations: 236,
+          hostileEliminations: 6916,
+          containersOpened: 4014,
+          successfulExfils: 108,
+        },
+        battleRoyale: {
+          timePlayed: null,
+          timePlayedMinutes: null,
+          kills: null,
+          kdRatio: null,
+          highestKillsPerGame: null,
+          wins: null,
+        },
+        resurgence: {
+          timePlayed: null,
+          timePlayedMinutes: null,
+          kills: null,
+          kdRatio: null,
+          highestKillsPerGame: null,
+          wins: null,
+        },
+      },
+    });
+
+    const getRes = await request(app).get('/api/stats/player/Onatic%233733397');
+    expect(getRes.status).toBe(200);
+    expect(getRes.body.found).toBe(true);
+    expect(getRes.body.fresh).toBe(false);
+    expect(getRes.body.data.activisionId).toBe('Onatic#3733397');
+    expect(getRes.body.data.imageUrl).toBe('https://pbs.twimg.com/media/HXgQ53eXAAAnXWK.jpg');
+
+    const postRes = await request(app)
+      .post('/api/stats')
+      .send({ activisionId: 'Onatic#3733397' });
+    expect(postRes.status).toBe(401);
+    expect(postRes.body.error.code).toBe('USER_X_LOGIN_REQUIRED');
+  });
+
   it('refreshes expired user OAuth 2.0 token automatically and fetches & caches stats', async () => {
     const expiredSession = sessionRepo.createSession({
       xUserId: 'uid-bob',
@@ -376,6 +442,10 @@ describe('X OAuth 2.0 PKCE User Flow & Daily Limit Isolation', () => {
     expect(finalJob?.state).toBe('completed');
     expect(finalJob?.result?.cardLayout).toBe('single_mode');
     expect(finalJob?.result?.modes.multiplayer.accuracyPercent).toBe(30);
+    expect(finalJob?.result?.imageUrl).toBe('https://pbs.twimg.com/media/bobcard.png');
+    expect(finalJob?.result?.localImagePath).toBeNull();
+    const imagesDir = path.join(tmpDir, 'images');
+    expect(!existsSync(imagesDir) || (await fs.readdir(imagesDir)).length === 0).toBe(true);
     expect(sessionRepo.findSessionById(expiredSession.id)?.accessToken).toBe(
       'fresh-access-bob',
     );

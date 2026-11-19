@@ -20,6 +20,12 @@ export interface SavedImageResult {
   mimeType: string;
 }
 
+export interface FetchedImageBuffer {
+  buffer: Buffer;
+  mimeType: string;
+  finalUrl: string;
+}
+
 export function validateTrustedImageUrl(rawUrl: string): URL {
   let parsed: URL;
   try {
@@ -82,11 +88,10 @@ export async function saveLocalImage(
 
 const DOWNLOAD_TIMEOUT_MS = 10_000;
 
-export async function downloadTrustedXImage(
+export async function fetchTrustedXImageBuffer(
   imageUrl: string,
-  imagesDir: string,
   fetchImpl: typeof fetch = fetch,
-): Promise<SavedImageResult> {
+): Promise<FetchedImageBuffer> {
   let currentUrl = validateTrustedImageUrl(imageUrl);
   let response: Response | null = null;
 
@@ -132,5 +137,22 @@ export async function downloadTrustedXImage(
 
   const arrayBuffer = await response.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  return saveLocalImage(buffer, mimeType, imagesDir);
+  if (buffer.byteLength === 0 || buffer.byteLength > MAX_IMAGE_BYTES) {
+    throw new Error(`Image size out of bounds (${buffer.byteLength} bytes)`);
+  }
+
+  return {
+    buffer,
+    mimeType,
+    finalUrl: currentUrl.toString(),
+  };
+}
+
+export async function downloadTrustedXImage(
+  imageUrl: string,
+  imagesDir: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<SavedImageResult> {
+  const fetched = await fetchTrustedXImageBuffer(imageUrl, fetchImpl);
+  return saveLocalImage(fetched.buffer, fetched.mimeType, imagesDir);
 }

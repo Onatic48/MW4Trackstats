@@ -7,11 +7,17 @@ interface SearchPanelProps {
   isSubmitting: boolean;
   serverError: string | null;
   onSubmit: (activisionId: string) => void;
+  onSelectSample?: (activisionId: string) => void;
 }
 
 const SAMPLE_IDS = ['Onatic#3733397'] as const;
 
-export function SearchPanel({ isSubmitting, serverError, onSubmit }: SearchPanelProps) {
+export function SearchPanel({
+  isSubmitting,
+  serverError,
+  onSubmit,
+  onSelectSample,
+}: SearchPanelProps) {
   const { t } = useI18n();
   const [value, setValue] = useState('');
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -57,7 +63,7 @@ export function SearchPanel({ isSubmitting, serverError, onSubmit }: SearchPanel
   const handlePickSample = (sampleId: string) => {
     setValue(sampleId);
     inputRef.current?.removeAttribute('data-server-invalid');
-    onSubmit(sampleId);
+    (onSelectSample ?? onSubmit)(sampleId);
   };
 
   return (

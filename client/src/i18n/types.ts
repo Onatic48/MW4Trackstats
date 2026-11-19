@@ -120,6 +120,7 @@ export interface Translations {
       title: string;
       subtitle: string;
       openButton: string;
+      openOnXButton: string;
       closeButton: string;
       dialogTitle: string;
       unavailable: string;
