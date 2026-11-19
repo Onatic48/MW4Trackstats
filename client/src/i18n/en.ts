@@ -7,6 +7,7 @@ export const en: Translations = {
   },
   topBar: {
     languageLabel: 'Language',
+    githubLabel: 'View source on GitHub',
     adapterDemo: 'Demo adapter',
     adapterPlaywright: 'Playwright X session',
     adapterApi: 'Official X API',

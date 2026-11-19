@@ -7,6 +7,7 @@ export const tr: Translations = {
   },
   topBar: {
     languageLabel: 'Dil',
+    githubLabel: 'GitHub deposunu görüntüle',
     adapterDemo: 'Demo adaptörü',
     adapterPlaywright: 'Playwright X oturumu',
     adapterApi: 'Resmi X API',

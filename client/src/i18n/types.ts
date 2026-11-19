@@ -12,6 +12,7 @@ export interface Translations {
   };
   topBar: {
     languageLabel: string;
+    githubLabel: string;
     adapterDemo: string;
     adapterPlaywright: string;
     adapterApi: string;
