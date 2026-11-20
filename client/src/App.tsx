@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { AlertTriangle, LogIn } from 'lucide-react';
 import type { JobErrorInfo } from '@mw4trackstats/shared';
+import { FeedbackModal } from './components/FeedbackModal';
 import { JobProgressTracker } from './components/JobProgressTracker';
 import { LegalFooter } from './components/LegalFooter';
 import { RecentLookups } from './components/RecentLookups';
@@ -37,6 +39,7 @@ function resolveErrorMessage(
 
 function TrackerWorkspace() {
   const { t } = useI18n();
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   const {
     auth,
     recent,
@@ -67,7 +70,11 @@ function TrackerWorkspace() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg-page)] text-[var(--text-primary)]">
-      <TopBar auth={auth} onLogout={() => void handleLogout()} />
+      <TopBar
+        auth={auth}
+        onLogout={() => void handleLogout()}
+        onOpenFeedback={() => setFeedbackOpen(true)}
+      />
 
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-6 md:px-8">
         <SearchPanel
@@ -180,6 +187,12 @@ function TrackerWorkspace() {
       </main>
 
       <LegalFooter onPurged={handleRecordPurged} />
+
+      <FeedbackModal
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        auth={auth}
+      />
     </div>
   );
 }

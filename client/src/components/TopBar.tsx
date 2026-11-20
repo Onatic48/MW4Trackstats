@@ -1,4 +1,4 @@
-import { Crosshair, Globe, LogIn, LogOut } from 'lucide-react';
+import { Crosshair, Globe, LogIn, LogOut, MessageSquare } from 'lucide-react';
 import type { AuthStatusResponse } from '@mw4trackstats/shared';
 import { useI18n } from '../i18n/I18nContext';
 import { SUPPORTED_LOCALES } from '../i18n/types';
@@ -8,9 +8,10 @@ const GITHUB_REPO_URL = 'https://github.com/Onatic48/MW4Trackstats';
 interface TopBarProps {
   auth: AuthStatusResponse | null;
   onLogout: () => void;
+  onOpenFeedback: () => void;
 }
 
-export function TopBar({ auth, onLogout }: TopBarProps) {
+export function TopBar({ auth, onLogout, onOpenFeedback }: TopBarProps) {
   const { locale, setLocale, t } = useI18n();
 
   return (
@@ -87,6 +88,17 @@ export function TopBar({ auth, onLogout }: TopBarProps) {
               );
             })}
           </div>
+
+          <button
+            type="button"
+            onClick={onOpenFeedback}
+            aria-label={t.feedback.buttonLabel}
+            title={t.feedback.buttonLabel}
+            className="h-9 px-2.5 sm:px-3 rounded-[8px] bg-[var(--bg-card)] border border-[var(--border-hairline)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-raised)] text-[13px] font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] inline-flex items-center gap-2 transition-colors duration-150 cursor-pointer"
+          >
+            <MessageSquare size={15} strokeWidth={1.5} aria-hidden="true" className="shrink-0" />
+            <span className="hidden md:inline">{t.feedback.buttonLabel}</span>
+          </button>
 
           <a
             href={GITHUB_REPO_URL}

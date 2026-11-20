@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { loadConfig, loadRootEnv } from './config.js';
 import { openDatabase } from './db/database.js';
+import { SqliteFeedbackRepository } from './db/feedbackRepository.js';
 import { SqliteJobRepository, SqliteStatsRepository } from './db/repository.js';
 import { SqliteSessionRepository } from './db/sessionRepository.js';
 import { createImageParser } from './providers/parser/index.js';
@@ -14,6 +15,7 @@ const db = openDatabase(config.databasePath);
 const statsRepo = new SqliteStatsRepository(db);
 const jobRepo = new SqliteJobRepository(db);
 const sessionRepo = new SqliteSessionRepository(db);
+const feedbackRepo = new SqliteFeedbackRepository(db);
 const xProvider = createXProvider(config);
 const imageParser = createImageParser(config);
 
@@ -33,6 +35,7 @@ const app = createApp({
   statsRepo,
   jobRepo,
   sessionRepo,
+  feedbackRepo,
   xProvider,
   activeParserProvider: imageParser.name,
   jobQueue,

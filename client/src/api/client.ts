@@ -1,6 +1,7 @@
 import type {
   AuthStatusResponse,
   CombatRecordStats,
+  FeedbackSubmitResponse,
   HealthResponse,
   JobErrorCode,
   JobStatusResponse,
@@ -154,6 +155,24 @@ export async function purgePlayerStats(
   }
 
   return (await res.json()) as { deleted: boolean; activisionId: string };
+}
+
+export async function submitFeedback(
+  message: string,
+  locale: 'en' | 'tr',
+): Promise<FeedbackSubmitResponse> {
+  const res = await fetch('/api/feedback', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, locale }),
+  });
+
+  if (!res.ok) {
+    throw await parseErrorResponse(res);
+  }
+
+  return (await res.json()) as FeedbackSubmitResponse;
 }
 
 export async function fetchJobStatus(jobId: string): Promise<JobStatusResponse> {

@@ -72,6 +72,20 @@ export function openDatabase(databasePath: string): DatabaseSync {
       oauth_state TEXT,
       expires_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS feedback_entries (
+      id TEXT PRIMARY KEY,
+      x_user_id TEXT NOT NULL,
+      x_username TEXT NOT NULL,
+      message TEXT NOT NULL,
+      locale TEXT NOT NULL,
+      synced_to_sheets INTEGER NOT NULL DEFAULT 0,
+      sync_error TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_feedback_entries_created
+      ON feedback_entries (created_at DESC);
   `);
 
   // Safe migration for existing SQLite databases created before x_session_id existed

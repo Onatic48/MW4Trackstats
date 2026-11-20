@@ -155,3 +155,9 @@ export interface HealthResponse {
   xDetail: string;
   oauth2Configured: boolean;
 }
+
+export interface FeedbackSubmitResponse {
+  ok: true;
+  id: string;
+  syncedToSheets: boolean;
+}

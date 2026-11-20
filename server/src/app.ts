@@ -4,6 +4,7 @@ import cors from 'cors';
 import express, { type Express } from 'express';
 import { validateActivisionId, type ParserProviderKind } from '@mw4trackstats/shared';
 import type { AppConfig } from './config.js';
+import type { FeedbackRepository } from './db/feedbackRepository.js';
 import type { JobRepository, StatsRepository } from './db/repository.js';
 import type { SessionRepository } from './db/sessionRepository.js';
 import { buildOEmbedPayload, renderIndexHtmlWithEmbedMeta } from './embeds/ogMeta.js';
@@ -12,6 +13,7 @@ import { createIpRateLimiter, type IpRateLimiter } from './middleware/rateLimit.
 import type { XProvider } from './providers/x/index.js';
 import type { JobQueueService } from './queue/jobQueue.js';
 import { createAuthRoutes } from './routes/auth.js';
+import { createFeedbackRouter } from './routes/feedback.js';
 import { createHealthRouter } from './routes/health.js';
 import { createStatsRouter } from './routes/stats.js';
 
@@ -20,12 +22,15 @@ export interface AppDependencies {
   statsRepo: StatsRepository;
   jobRepo: JobRepository;
   sessionRepo?: SessionRepository;
+  feedbackRepo?: FeedbackRepository;
   xProvider: XProvider;
   activeParserProvider: ParserProviderKind;
   jobQueue: JobQueueService;
   readLimiter?: IpRateLimiter;
   uncachedLimiter?: IpRateLimiter;
+  feedbackLimiter?: IpRateLimiter;
   authFetchImpl?: typeof fetch;
+  feedbackFetchImpl?: typeof fetch;
 }
 
 export function createApp(deps: AppDependencies): Express {
@@ -70,6 +75,13 @@ export function createApp(deps: AppDependencies): Express {
       maxRequests: deps.config.rateLimitMaxUncached,
     });
 
+  const feedbackLimiter =
+    deps.feedbackLimiter ??
+    createIpRateLimiter({
+      windowMs: 15 * 60_000,
+      maxRequests: 5,
+    });
+
   if (deps.sessionRepo) {
     const auth = createAuthRoutes({
       config: deps.config,
@@ -80,6 +92,20 @@ export function createApp(deps: AppDependencies): Express {
     app.get('/callback', (req, res) => {
       void auth.callbackHandler(req, res);
     });
+  }
+
+  if (deps.sessionRepo && deps.feedbackRepo) {
+    app.use(
+      '/api',
+      createFeedbackRouter({
+        config: deps.config,
+        sessionRepo: deps.sessionRepo,
+        feedbackRepo: deps.feedbackRepo,
+        readLimiter,
+        feedbackLimiter,
+        fetchImpl: deps.feedbackFetchImpl,
+      }),
+    );
   }
 
   app.use(

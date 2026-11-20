@@ -176,4 +176,17 @@ export const en: Translations = {
     removalSuccessFound: 'Cached record was permanently deleted from the server for',
     removalSuccessNotFound: 'No cached record was stored on the server for',
   },
+  feedback: {
+    buttonLabel: 'Feedback',
+    modalTitle: 'Send feedback',
+    closeButton: 'Close',
+    loginRequiredText: 'Sign in with your X account to share feedback about MW4Trackstats.',
+    submittingAs: 'Submitting as',
+    textareaLabel: 'Your feedback',
+    textareaPlaceholder: 'Share a bug report, feature idea, or comment...',
+    submitButton: 'Send feedback',
+    submittingButton: 'Sending',
+    successMessage: 'Thank you. Your feedback has been recorded.',
+    minLengthError: 'Please enter at least 5 characters.',
+  },
 };

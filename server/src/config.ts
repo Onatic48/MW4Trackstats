@@ -107,6 +107,9 @@ const EnvSchema = z.object({
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().min(1000).max(86400000).default(900000),
   RATE_LIMIT_MAX_UNCACHED: z.coerce.number().int().min(1).max(1000).default(5),
   RATE_LIMIT_MAX_READS: z.coerce.number().int().min(1).max(5000).default(60),
+
+  GOOGLE_SHEETS_WEBHOOK_URL: z.string().optional().default(''),
+  GOOGLE_SHEETS_WEBHOOK_SECRET: z.string().optional().default(''),
 });
 
 export interface AppConfig {
@@ -145,6 +148,8 @@ export interface AppConfig {
   rateLimitMaxUncached: number;
   rateLimitMaxReads: number;
   mockStepDelayMs: number;
+  googleSheetsWebhookUrl: string;
+  googleSheetsWebhookSecret: string;
 }
 
 export function extractTweetIdFromUrl(url: string): string {
@@ -208,5 +213,7 @@ export function loadConfig(
     rateLimitMaxUncached: parsed.RATE_LIMIT_MAX_UNCACHED,
     rateLimitMaxReads: parsed.RATE_LIMIT_MAX_READS,
     mockStepDelayMs: Number.parseInt(env.MOCK_STEP_DELAY_MS ?? '700', 10) || 700,
+    googleSheetsWebhookUrl: parsed.GOOGLE_SHEETS_WEBHOOK_URL.trim(),
+    googleSheetsWebhookSecret: parsed.GOOGLE_SHEETS_WEBHOOK_SECRET.trim(),
   };
 }

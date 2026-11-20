@@ -171,4 +171,17 @@ export interface Translations {
     removalSuccessFound: string;
     removalSuccessNotFound: string;
   };
+  feedback: {
+    buttonLabel: string;
+    modalTitle: string;
+    closeButton: string;
+    loginRequiredText: string;
+    submittingAs: string;
+    textareaLabel: string;
+    textareaPlaceholder: string;
+    submitButton: string;
+    submittingButton: string;
+    successMessage: string;
+    minLengthError: string;
+  };
 }

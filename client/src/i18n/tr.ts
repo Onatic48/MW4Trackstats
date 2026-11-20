@@ -176,4 +176,17 @@ export const tr: Translations = {
     removalSuccessFound: 'Bu kimliğe ait önbellek kaydı sunucudan kalıcı olarak silindi:',
     removalSuccessNotFound: 'Sunucuda bu kimliğe ait kayıtlı bir önbellek verisi bulunamadı:',
   },
+  feedback: {
+    buttonLabel: 'Geri bildirim',
+    modalTitle: 'Geri bildirim gönder',
+    closeButton: 'Kapat',
+    loginRequiredText: 'MW4Trackstats hakkında geri bildirim göndermek için X hesabınızla giriş yapın.',
+    submittingAs: 'Gönderen hesap',
+    textareaLabel: 'Geri bildiriminiz',
+    textareaPlaceholder: 'Hata bildirimi, özellik önerisi veya görüşünüzü yazın...',
+    submitButton: 'Gönder',
+    submittingButton: 'Gönderiliyor',
+    successMessage: 'Teşekkürler. Geri bildiriminiz kaydedildi.',
+    minLengthError: 'Lütfen en az 5 karakter girin.',
+  },
 };
